@@ -316,3 +316,38 @@ Error fetching cars: TypeError: Cannot read properties of undefined (reading 'fi
   8 |         specs: true,
   9 |         valuation: true,
  GET /api/cars 500 in 52ms (compile: 1995µs, render: 50ms)
+Error fetching cars: TypeError: Cannot read properties of undefined (reading 'findMany')
+    at GET (src/app/api/cars/route.ts:6:31)
+  4 | export async function GET() {
+  5 |   try {
+> 6 |     const cars = await db.car.findMany({
+    |                               ^
+  7 |       include: {
+  8 |         specs: true,
+  9 |         valuation: true,
+ GET /api/cars 500 in 45ms (compile: 2ms, render: 42ms)
+ GET / 200 in 46ms (compile: 4ms, render: 41ms)
+ GET / 200 in 45ms (compile: 4ms, render: 41ms)
+Error fetching cars: TypeError: Cannot read properties of undefined (reading 'findMany')
+    at GET (src/app/api/cars/route.ts:6:31)
+  4 | export async function GET() {
+  5 |   try {
+> 6 |     const cars = await db.car.findMany({
+    |                               ^
+  7 |       include: {
+  8 |         specs: true,
+  9 |         valuation: true,
+ GET /api/cars 500 in 78ms (compile: 3ms, render: 75ms)
+ GET / 200 in 35ms (compile: 2ms, render: 32ms)
+Error fetching cars: TypeError: Cannot read properties of undefined (reading 'findMany')
+    at GET (src/app/api/cars/route.ts:6:31)
+  4 | export async function GET() {
+  5 |   try {
+> 6 |     const cars = await db.car.findMany({
+    |                               ^
+  7 |       include: {
+  8 |         specs: true,
+  9 |         valuation: true,
+ GET /api/cars 500 in 61ms (compile: 1948µs, render: 59ms)
+error: script "dev" was terminated by signal SIGTERM (Polite quit request)
+[?25h

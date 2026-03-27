@@ -15,6 +15,7 @@ export function CarCard({ car, index }: CarCardProps) {
   const { openModal } = useCarStore();
 
   const formatPrice = (value: number) => {
+    if (!value) return '$0';
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -24,8 +25,15 @@ export function CarCard({ car, index }: CarCardProps) {
   };
 
   const formatMileage = (value: number) => {
+    if (!value) return '0';
     return new Intl.NumberFormat('ru-RU').format(value);
   };
+
+  const year = car.specs?.year || 'N/A';
+  const country = car.specs?.country || 'N/A';
+  const mileage = car.specs?.mileage || 0;
+  const currentValue = car.valuation?.currentValue || 0;
+  const image = car.images?.[0] || '/cars/hero-bg.png';
 
   return (
     <motion.div
@@ -43,7 +51,7 @@ export function CarCard({ car, index }: CarCardProps) {
         {/* Large Image Area */}
         <div className="relative h-[280px] sm:h-[320px] overflow-hidden">
           <motion.img
-            src={car.images[0]}
+            src={image}
             alt={car.name}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
@@ -76,15 +84,15 @@ export function CarCard({ car, index }: CarCardProps) {
             <div className="flex items-center gap-5 text-sm text-gray-300 mb-4">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-amber-400" />
-                <span>{car.specs.year}</span>
+                <span>{year}</span>
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-amber-400" />
-                <span>{car.specs.country}</span>
+                <span>{country}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Gauge className="w-4 h-4 text-amber-400" />
-                <span>{formatMileage(car.specs.mileage)} км</span>
+                <span>{formatMileage(mileage)} км</span>
               </div>
             </div>
 
@@ -93,7 +101,7 @@ export function CarCard({ car, index }: CarCardProps) {
               <div>
                 <p className="text-xs text-gray-400 mb-1">Оценочная стоимость</p>
                 <p className="text-2xl sm:text-3xl font-bold text-gradient">
-                  {formatPrice(car.valuation.currentValue)}
+                  {formatPrice(currentValue)}
                 </p>
               </div>
               <motion.div
