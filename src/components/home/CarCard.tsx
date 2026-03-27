@@ -1,7 +1,8 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { Gauge, MapPin, Calendar, ChevronRight } from 'lucide-react';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { useRef } from 'react';
+import { Gauge, MapPin, Calendar } from 'lucide-react';
 import type { Car } from '@/types/car';
 import { getConditionLabel, getConditionColor, getLocationLabel, getLocationColor } from '@/data/cars';
 import { useCarStore } from '@/store/useStore';
@@ -12,7 +13,38 @@ interface CarCardProps {
 }
 
 export function CarCard({ car, index }: CarCardProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
   const { openModal } = useCarStore();
+
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const mouseXSpring = useSpring(x, { stiffness: 500, damping: 100 });
+  const mouseYSpring = useSpring(y, { stiffness: 500, damping: 100 });
+
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ['10deg', '-10deg']);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ['-10deg', '10deg']);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+
+    const rect = cardRef.current.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    const xPct = mouseX / width - 0.5;
+    const yPct = mouseY / height - 0.5;
+
+    x.set(xPct);
+    y.set(yPct);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
 
   const formatPrice = (value: number) => {
     if (!value) return '$0';
@@ -37,79 +69,94 @@ export function CarCard({ car, index }: CarCardProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
+      ref={cardRef}
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-50px' }}
+      transition={{ duration: 0.6, delay: index * 0.1 }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
       onClick={() => openModal(car)}
-      className="relative flex-shrink-0 w-[380px] sm:w-[420px] cursor-pointer group"
+      style={{
+        rotateX,
+        rotateY,
+        transformStyle: 'preserve-3d',
+      }}
+      className="relative group cursor-pointer perspective-1000"
     >
       {/* Glow Effect */}
-      <div className="absolute -inset-2 bg-gradient-to-r from-amber-500/30 via-amber-500/20 to-blue-500/30 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+      <div className="absolute -inset-1 bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-blue-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-      {/* Card */}
-      <div className="relative glass-card overflow-hidden rounded-2xl">
-        {/* Large Image Area */}
-        <div className="relative h-[280px] sm:h-[320px] overflow-hidden">
+      {/* Card Content */}
+      <div className="relative glass-card glass-card-hover overflow-hidden">
+        {/* Image */}
+        <div className="relative h-48 sm:h-56 overflow-hidden">
           <motion.img
             src={image}
             alt={car.name}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
 
-          {/* Gradient Overlays */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent" />
+          {/* Image Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-          {/* Top Badges */}
+          {/* Badges Container */}
           <div className="absolute top-4 left-4 right-4 flex justify-between items-start">
-            <span className={`px-4 py-2 rounded-full text-xs font-semibold border backdrop-blur-md ${getConditionColor(car.condition)}`}>
+            {/* Condition Badge - Left */}
+            <span className={`px-3 py-1.5 rounded-full text-xs font-medium border backdrop-blur-sm ${getConditionColor(car.condition)}`}>
               {getConditionLabel(car.condition)}
             </span>
-            <span className={`px-4 py-2 rounded-full text-xs font-semibold border backdrop-blur-md ${getLocationColor(car.location)}`}>
+
+            {/* Location Badge - Right */}
+            <span className={`px-3 py-1.5 rounded-full text-xs font-medium border backdrop-blur-sm ${getLocationColor(car.location)}`}>
               {getLocationLabel(car.location)}
             </span>
           </div>
+        </div>
 
-          {/* Bottom Info Overlay */}
-          <div className="absolute bottom-0 left-0 right-0 p-6">
-            {/* Car Name */}
-            <div className="mb-3">
-              <h3 className="text-2xl sm:text-3xl font-bold text-white mb-1 group-hover:text-amber-400 transition-colors">
-                {car.name}
-              </h3>
-              <p className="text-gray-300 text-sm">{car.subtitle}</p>
+        {/* Info */}
+        <div className="p-5 sm:p-6">
+          {/* Title */}
+          <div className="mb-4">
+            <h3 className="text-xl sm:text-2xl font-bold text-white mb-1 group-hover:text-amber-500 transition-colors">
+              {car.name}
+            </h3>
+            <p className="text-gray-400 text-sm">{car.subtitle}</p>
+          </div>
+
+          {/* Quick Specs */}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="flex items-center gap-2 text-gray-400 text-sm">
+              <Calendar className="w-4 h-4 text-amber-500/70" />
+              <span>{year}</span>
             </div>
-
-            {/* Quick Specs Row */}
-            <div className="flex items-center gap-5 text-sm text-gray-300 mb-4">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-amber-400" />
-                <span>{year}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-amber-400" />
-                <span>{country}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Gauge className="w-4 h-4 text-amber-400" />
-                <span>{formatMileage(mileage)} км</span>
-              </div>
+            <div className="flex items-center gap-2 text-gray-400 text-sm">
+              <MapPin className="w-4 h-4 text-amber-500/70" />
+              <span>{country}</span>
             </div>
+            <div className="flex items-center gap-2 text-gray-400 text-sm col-span-2">
+              <Gauge className="w-4 h-4 text-amber-500/70" />
+              <span>{formatMileage(mileage)} км</span>
+            </div>
+          </div>
 
-            {/* Price Row */}
-            <div className="flex items-end justify-between pt-4 border-t border-white/10">
+          {/* Price */}
+          <div className="pt-4 border-t border-white/5">
+            <div className="flex items-end justify-between">
               <div>
-                <p className="text-xs text-gray-400 mb-1">Оценочная стоимость</p>
-                <p className="text-2xl sm:text-3xl font-bold text-gradient">
+                <p className="text-xs text-gray-500 mb-1">Оценочная стоимость</p>
+                <p className="text-xl sm:text-2xl font-bold text-gradient">
                   {formatPrice(currentValue)}
                 </p>
               </div>
               <motion.div
-                whileHover={{ x: 8 }}
-                className="flex items-center gap-2 text-amber-400 text-sm font-medium bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-amber-500/30 group-hover:bg-amber-500/20 transition-colors"
+                whileHover={{ x: 5 }}
+                className="text-amber-500 text-sm font-medium flex items-center gap-1"
               >
                 Подробнее
-                <ChevronRight className="w-4 h-4" />
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               </motion.div>
             </div>
           </div>
