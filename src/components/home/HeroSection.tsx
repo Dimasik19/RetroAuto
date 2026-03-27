@@ -9,7 +9,7 @@ export function HeroSection() {
   const { scrollY } = useScroll();
   const y = useTransform(scrollY, [0, 500], [0, 150]);
 
-  const totalValue = cars.reduce((sum, car) => sum + (car.valuation?.currentValue || 0), 0);
+  const totalValue = Array.isArray(cars) ? cars.reduce((sum, car) => sum + (car.valuation?.currentValue || 0), 0) : 0;
   const formatTotal = (value: number) => {
     if (value >= 1000) return `$${Math.round(value / 1000)}K`;
     return `$${value}`;
@@ -100,7 +100,7 @@ export function HeroSection() {
           className="mt-12 sm:mt-20 grid grid-cols-3 gap-4 sm:gap-8 max-w-2xl mx-auto"
         >
           <div className="glass-card p-4 sm:p-6">
-            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-gradient mb-1">{cars.length}</div>
+            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-gradient mb-1">{Array.isArray(cars) ? cars.length : 0}</div>
             <div className="text-xs sm:text-sm text-gray-400">Автомобиля</div>
           </div>
           <div className="glass-card p-4 sm:p-6">

@@ -96,14 +96,14 @@ export function CarsGrid() {
               msOverflowStyle: 'none',
             }}
           >
-            {cars.map((car, index) => (
+            {Array.isArray(cars) && cars.map((car, index) => (
               <CarCard key={car.id} car={car} index={index} />
             ))}
           </div>
 
           {/* Scroll Indicator Dots */}
           <div className="flex justify-center gap-2 mt-8">
-            {cars.map((_, index) => (
+            {Array.isArray(cars) && cars.map((_, index) => (
               <motion.div
                 key={index}
                 initial={{ scale: 0.8, opacity: 0.5 }}
