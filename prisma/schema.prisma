@@ -1,0 +1,108 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:../db/local.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Car {
+  id          String   @id @default(cuid())
+  name        String
+  subtitle    String
+  description String
+  condition   String   @default("running")
+  location    String   @default("in_collection")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  specs      CarSpecs?
+  valuation  CarValuation?
+  owners     CarOwner[]
+  timeline   CarTimelineEvent[]
+  images     CarImage[]
+
+  @@map("cars")
+}
+
+model CarSpecs {
+  id              String @id @default(cuid())
+  carId           String @unique
+  brand           String
+  model           String
+  year            Int
+  color           String
+  bodyType        String
+  engine          String
+  engineVolume    String
+  power           String
+  transmission    String
+  drive           String
+  vin             String
+  mileage         Int
+  country         String
+  acquisitionDate String
+  condition       String
+
+  car Car @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  @@map("car_specs")
+}
+
+model CarValuation {
+  id              String @id @default(cuid())
+  carId           String @unique
+  currentValue    Int
+  minValue        Int
+  maxValue        Int
+  assessmentDate  String
+  comment         String
+
+  car Car @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  @@map("car_valuation")
+}
+
+model CarOwner {
+  id     String @id @default(cuid())
+  carId  String
+  name   String
+  period String
+  note   String
+  order  Int    @default(0)
+
+  car Car @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  @@index([carId])
+  @@map("car_owners")
+}
+
+model CarTimelineEvent {
+  id          String @id @default(cuid())
+  carId       String
+  year        Int
+  title       String
+  description String
+  icon        String
+  order       Int    @default(0)
+
+  car Car @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  @@index([carId])
+  @@map("car_timeline")
+}
+
+model CarImage {
+  id        String   @id @default(cuid())
+  carId     String
+  filename  String
+  url       String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  car Car @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  @@index([carId])
+  @@map("car_images")
+}
