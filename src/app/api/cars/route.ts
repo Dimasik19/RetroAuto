@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { fallbackCars } from '@/lib/fallback-cars';
 
 export async function GET() {
   try {
@@ -20,6 +21,10 @@ export async function GET() {
       orderBy: { createdAt: 'asc' },
     });
 
+    if (cars.length === 0) {
+      return NextResponse.json(fallbackCars);
+    }
+
     const formattedCars = cars.map((car) => ({
       id: car.id,
       name: car.name,
@@ -37,6 +42,6 @@ export async function GET() {
     return NextResponse.json(formattedCars);
   } catch (error) {
     console.error('Error fetching cars:', error);
-    return NextResponse.json({ error: 'Failed to fetch cars' }, { status: 500 });
+    return NextResponse.json(fallbackCars);
   }
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { getFallbackCarById } from '@/lib/fallback-cars';
 
 export async function GET(
   request: NextRequest,
@@ -19,6 +20,11 @@ export async function GET(
     });
 
     if (!car) {
+      const fallbackCar = getFallbackCarById(id);
+      if (fallbackCar) {
+        return NextResponse.json(fallbackCar);
+      }
+
       return NextResponse.json({ error: 'Car not found' }, { status: 404 });
     }
 
@@ -30,6 +36,12 @@ export async function GET(
     });
   } catch (error) {
     console.error('Error fetching car:', error);
+    const { id } = await params;
+    const fallbackCar = getFallbackCarById(id);
+    if (fallbackCar) {
+      return NextResponse.json(fallbackCar);
+    }
+
     return NextResponse.json({ error: 'Failed to fetch car' }, { status: 500 });
   }
 }
