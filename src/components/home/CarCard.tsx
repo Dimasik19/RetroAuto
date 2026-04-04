@@ -90,7 +90,7 @@ export function CarCard({ car, index }: CarCardProps) {
       {/* Card Content */}
       <div className="relative glass-card glass-card-hover overflow-hidden">
         {/* Image */}
-        <div className="relative h-48 sm:h-56 overflow-hidden">
+        <div className="relative h-64 sm:h-72 overflow-hidden">
           <motion.img
             src={image}
             alt={car.name}

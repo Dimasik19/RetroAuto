@@ -84,7 +84,7 @@ export function HeroSection() {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
-          <button onClick={scrollToCollection} className="btn-premium text-black font-semibold px-8 py-6 text-base sm:text-lg glow-amber">
+          <button onClick={scrollToCollection} className="btn-premium rounded-md text-black font-semibold px-8 py-6 text-base sm:text-lg glow-amber">
             <span>Смотреть коллекцию</span>
           </button>
           <button onClick={scrollToAbout} className="px-8 py-6 text-base sm:text-lg border border-white/20 text-white hover:bg-white/5 hover:text-amber-500 rounded-md transition-colors">

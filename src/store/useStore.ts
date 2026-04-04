@@ -6,7 +6,7 @@ import type { Car } from '@/types/car';
 
 interface AuthState {
   isAuthenticated: boolean;
-  login: (password: string) => boolean;
+  login: (password: string) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -35,12 +35,21 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       isAuthenticated: false,
-      login: (password: string) => {
-        if (password === 'retro2024') {
-          set({ isAuthenticated: true });
-          return true;
+      login: async (password: string) => {
+        try {
+          const response = await fetch('/api/auth', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password }),
+          });
+          if (response.ok) {
+            set({ isAuthenticated: true });
+            return true;
+          }
+          return false;
+        } catch {
+          return false;
         }
-        return false;
       },
       logout: () => {
         set({ isAuthenticated: false });
@@ -80,19 +89,13 @@ export const useCarStore = create<CarState>()((set, get) => ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates),
       });
-      
+
       if (response.ok) {
+        const updatedCar = await response.json();
         const state = get();
-        const updatedCars = state.cars.map((car) =>
-          car.id === carId ? { ...car, ...updates } : car
-        );
-        const updatedSelectedCar = state.selectedCar?.id === carId
-          ? { ...state.selectedCar, ...updates }
-          : state.selectedCar;
-        
         set({
-          cars: updatedCars,
-          selectedCar: updatedSelectedCar,
+          cars: state.cars.map((car) => car.id === carId ? updatedCar : car),
+          selectedCar: state.selectedCar?.id === carId ? updatedCar : state.selectedCar,
         });
       }
     } catch (error) {

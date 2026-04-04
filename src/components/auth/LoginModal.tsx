@@ -13,9 +13,9 @@ export function LoginModal() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (login(password)) {
+    if (await login(password)) {
       setPassword('');
       setError(false);
       closeLoginModal();
